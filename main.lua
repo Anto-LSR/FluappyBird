@@ -5,6 +5,7 @@ function init()
 end
 
 function love.load()
+    love.window.setTitle( "fLUAppy bird" )
     player = {}
     player.x = 200
     player.y = 100
@@ -18,18 +19,25 @@ function love.load()
     player.points = 0
 
  -- -----------------------------------------
+    
     upperPipe = {}
-    upperPipe.height = 300
+    upperPipe.height = 100
     upperPipe.width = 100
     upperPipe.x = 800
     upperPipe.y = 0
+    upperPipe.sprite = love.graphics.newImage('sprites/lowerPipe.png')
 
+    
     lowerPipe = {}
     lowerPipe.height = 300
     lowerPipe.width = 100
     lowerPipe.x = 800
-    lowerPipe.y = upperPipe.y + upperPipe.height + 150
+    lowerPipe.y = upperPipe.y + upperPipe.height + 250
+    lowerPipe.sprite = love.graphics.newImage('sprites/upperPipe.png')
  -- ------------------------------------------  
+
+    background = love.graphics.newImage('sprites/background.png')
+    font = love.graphics.newFont('fonts/FlappyFont.ttf', 125)
 end
 
 local jumping = false
@@ -37,6 +45,14 @@ local jumpingDelay = 0
 
 
 function love.update(dt)
+    if love.keyboard.isDown('escape') then
+        love.event.quit()
+    end
+
+    if love.keyboard.isDown('r') then
+        init()
+    end
+
     upperPipe.x = upperPipe.x - (player.speed * dt)
     lowerPipe.x = lowerPipe.x - (player.speed * dt)
     jumpingDelay = jumpingDelay + dt
@@ -60,6 +76,9 @@ function love.update(dt)
 
     --Verif collision avec le sol
         --TODO
+    if player.y >= love.graphics.getHeight() then
+        init()
+    end
 
     --Chûte du joueur
     player.y = player.y + 1
@@ -67,7 +86,7 @@ function love.update(dt)
     player.collide = CheckCollisionUpperPipe(upperPipe.x, upperPipe.y, upperPipe.width, upperPipe.height, player.x, player.y, player.width, player.height) or CheckCollisionLowerPipe(lowerPipe.x, lowerPipe.y, lowerPipe.width, lowerPipe.height, player.x, player.y, player.width, player.height)
 
     --Generation des pipes
-    if upperPipe.x < -100 then
+    if upperPipe.x < -100  then
         upperPipe.x = love.graphics.getWidth()
         upperPipe.y = 0
         upperPipe.height = math.random(100, 300)
@@ -100,18 +119,28 @@ function love.keypressed(key)
 end
 
 function love.draw()
+    red = 25/255
+    green = 100/255
+    blue = 25/255
+    alpha = 50/100
+    love.graphics.setBackgroundColor( red, green, blue, alpha)
+    love.graphics.setFont(font)
+    love.graphics.draw(background, 0, 0)
     --Player
-    --love.graphics.circle("fill", player.x, player.y, 10)
-    love.graphics.rectangle("line", player.x, player.y, player.width, player.height)
     love.graphics.draw(player.sprite, player.x, player.y, nil, 0.5)
 
     --Pipes
-    
     love.graphics.rectangle('fill', upperPipe.x, upperPipe.y, upperPipe.width, upperPipe.height)
     love.graphics.rectangle('fill', lowerPipe.x, lowerPipe.y, lowerPipe.width, lowerPipe.height)
 
-    love.graphics.print(tostring(player.points), 100, 100)
 
+     love.graphics.draw(upperPipe.sprite, upperPipe.x,upperPipe.y - lowerPipe.height, nil, 0.4, nil, 25)
+     love.graphics.draw(lowerPipe.sprite, lowerPipe.x, lowerPipe.y, nil, 0.4, nil, 25)
+    
+     love.graphics.print(tostring(player.points), 100, 50)
+
+
+    
 end
 
 -- Collision detection function;
